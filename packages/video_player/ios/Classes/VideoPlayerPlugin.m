@@ -93,6 +93,7 @@ static void* playbackBufferFullContext = &playbackBufferFullContext;
 
 - (void)itemDidPlayToEndTime:(NSNotification*)notification {
   if (_isLooping) {
+    _eventSink(@{@"event" : @"singlePlayCompleted"});
     AVPlayerItem* p = [notification object];
     [p seekToTime:kCMTimeZero completionHandler:nil];
   } else {
