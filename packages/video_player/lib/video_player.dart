@@ -148,7 +148,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   /// The name of the asset is given by the [dataSource] argument and must not be
   /// null. The [package] argument must be non-null when the asset comes from a
   /// package and null otherwise.
-  VideoPlayerController.asset(this.dataSource, {this.package})
+  VideoPlayerController.asset(this.dataSource, {this.package,this.onSinglePlayCompleted})
       : dataSourceType = DataSourceType.asset,
         formatHint = null,
         _isCached = false,
@@ -162,7 +162,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   /// **Android only**: The [formatHint] option allows the caller to override
   /// the video format detection code.
   VideoPlayerController.network(this.dataSource,
-      {this.formatHint, bool isCached = true})
+      {this.formatHint, bool isCached = true, this.onSinglePlayCompleted})
       : dataSourceType = DataSourceType.network,
         _isCached = isCached ?? false,
         package = null,
@@ -172,7 +172,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   ///
   /// This will load the file from the file-URI given by:
   /// `'file://${file.path}'`.
-  VideoPlayerController.file(File file)
+  VideoPlayerController.file(File file, {this.onSinglePlayCompleted})
       : dataSource = 'file://${file.path}',
         dataSourceType = DataSourceType.file,
         package = null,
@@ -187,6 +187,8 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   /// Describes the type of data source this [VideoPlayerController]
   /// is constructed with.
   final DataSourceType dataSourceType;
+
+  final VoidCallback onSinglePlayCompleted;
 
   /// The maximum cache size to keep on disk in bytes.
   static int _maxCacheSize = 100 * 1024 * 1024;
@@ -295,6 +297,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
           break;
         case 'completed':
           value = value.copyWith(isPlaying: false, position: value.duration);
+          print('8888888888889');
           _timer?.cancel();
           break;
         case 'bufferingUpdate':
@@ -308,6 +311,10 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
           break;
         case 'bufferingEnd':
           value = value.copyWith(isBuffering: false);
+          break;
+        case 'singlePlayCompleted':
+          print('flutter 播放完成');
+          onSinglePlayCompleted != null && onSinglePlayCompleted();
           break;
       }
     }
