@@ -297,7 +297,6 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
           break;
         case 'completed':
           value = value.copyWith(isPlaying: false, position: value.duration);
-          print('8888888888889');
           _timer?.cancel();
           break;
         case 'bufferingUpdate':
@@ -313,7 +312,6 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
           value = value.copyWith(isBuffering: false);
           break;
         case 'singlePlayCompleted':
-          print('flutter 播放完成');
           onSinglePlayCompleted != null && onSinglePlayCompleted();
           break;
       }
