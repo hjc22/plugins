@@ -223,7 +223,7 @@ public class VideoPlayerPlugin implements MethodCallHandler {
             @Override
             public void onPositionDiscontinuity(int reason) {
               Map<String, Object> event = new HashMap<>();
-              event.put("event", "SinglePlayCompleted");
+              event.put("event", "singlePlayCompleted");
               eventSink.success(event);
             }
           });
