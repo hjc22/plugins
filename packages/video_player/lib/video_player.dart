@@ -235,8 +235,8 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
     /// Initializing cements the cache size
     VideoPlayerController._hasAlreadySetCache = true;
 
-    _lifeCycleObserver = _VideoAppLifeCycleObserver(this);
-    _lifeCycleObserver.initialize();
+//     _lifeCycleObserver = _VideoAppLifeCycleObserver(this);
+//     _lifeCycleObserver.initialize();
     _creatingCompleter = Completer<void>();
     Map<dynamic, dynamic> dataSourceDescription;
     switch (dataSourceType) {
@@ -312,7 +312,9 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
           value = value.copyWith(isBuffering: false);
           break;
         case 'singlePlayCompleted':
-          onSinglePlayCompleted != null && onSinglePlayCompleted();
+          if(onSinglePlayCompleted != null) {
+            onSinglePlayCompleted();
+          }
           break;
       }
     }
@@ -346,7 +348,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
           <String, dynamic>{'textureId': _textureId},
         );
       }
-      _lifeCycleObserver.dispose();
+//       _lifeCycleObserver.dispose();
     }
     _isDisposed = true;
     super.dispose();
