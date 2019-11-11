@@ -173,7 +173,8 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   /// The name of the asset is given by the [dataSource] argument and must not be
   /// null. The [package] argument must be non-null when the asset comes from a
   /// package and null otherwise.
-  VideoPlayerController.asset(this.dataSource, {this.package})
+  VideoPlayerController.asset(this.dataSource,
+      {this.package, this.onSinglePlayCompleted})
       : dataSourceType = DataSourceType.asset,
         formatHint = null,
         super(VideoPlayerValue(duration: null));
@@ -185,7 +186,8 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   /// null.
   /// **Android only**: The [formatHint] option allows the caller to override
   /// the video format detection code.
-  VideoPlayerController.network(this.dataSource, {this.formatHint})
+  VideoPlayerController.network(this.dataSource,
+      {this.formatHint, this.onSinglePlayCompleted})
       : dataSourceType = DataSourceType.network,
         package = null,
         super(VideoPlayerValue(duration: null));
@@ -194,7 +196,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   ///
   /// This will load the file from the file-URI given by:
   /// `'file://${file.path}'`.
-  VideoPlayerController.file(File file)
+  VideoPlayerController.file(File file, {this.onSinglePlayCompleted})
       : dataSource = 'file://${file.path}',
         dataSourceType = DataSourceType.file,
         package = null,
@@ -205,7 +207,8 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   ///
   /// This will load the file from the file-URI given by:
   /// `'file://${fileIdentifier}'` or `'file://${fileIdentifier}'`.
-  VideoPlayerController.localFile(String fileIdentifier)
+  VideoPlayerController.localFile(String fileIdentifier,
+      {this.onSinglePlayCompleted})
       : dataSource = Platform.isIOS
             ? 'phasset://$fileIdentifier'
             : 'file://$fileIdentifier',
@@ -222,12 +225,14 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   /// is constructed with.
   final DataSourceType dataSourceType;
 
+  final VoidCallback onSinglePlayCompleted;
+
   final String package;
   Timer _timer;
   bool _isDisposed = false;
   Completer<void> _creatingCompleter;
   StreamSubscription<dynamic> _eventSubscription;
-  _VideoAppLifeCycleObserver _lifeCycleObserver;
+  // _VideoAppLifeCycleObserver _lifeCycleObserver;
 
   @visibleForTesting
   int get textureId => _textureId;
@@ -235,8 +240,8 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   bool get isDisposed => _isDisposed;
 
   Future<void> initialize() async {
-    _lifeCycleObserver = _VideoAppLifeCycleObserver(this);
-    _lifeCycleObserver.initialize();
+    // _lifeCycleObserver = _VideoAppLifeCycleObserver(this);
+    // _lifeCycleObserver.initialize();
     _creatingCompleter = Completer<void>();
     Map<dynamic, dynamic> dataSourceDescription;
     switch (dataSourceType) {
@@ -308,6 +313,11 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
         case 'bufferingEnd':
           value = value.copyWith(isBuffering: false);
           break;
+        case 'singlePlayCompleted':
+          if (onSinglePlayCompleted != null) {
+            onSinglePlayCompleted();
+          }
+          break;
       }
     }
 
@@ -340,7 +350,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
           <String, dynamic>{'textureId': _textureId},
         );
       }
-      _lifeCycleObserver.dispose();
+      // _lifeCycleObserver.dispose();
     }
     _isDisposed = true;
     super.dispose();
