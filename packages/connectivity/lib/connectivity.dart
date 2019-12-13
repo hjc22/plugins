@@ -15,6 +15,9 @@ enum ConnectivityResult {
 
   /// Mobile: Device connected to cellular network
   mobile,
+  moblie_4G,
+  moblie_3G,
+  moblie_2G,
 
   /// None: Device not connected to any network
   none
@@ -229,6 +232,12 @@ ConnectivityResult _parseConnectivityResult(String state) {
       return ConnectivityResult.wifi;
     case 'mobile':
       return ConnectivityResult.mobile;
+    case '4G':
+      return ConnectivityResult.moblie_4G;
+    case '3G':
+      return ConnectivityResult.moblie_3G;
+    case '2G':
+      return ConnectivityResult.moblie_2G;
     case 'none':
     default:
       return ConnectivityResult.none;

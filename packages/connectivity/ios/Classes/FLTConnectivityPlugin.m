@@ -10,6 +10,9 @@
 #import "FLTConnectivityLocationHandler.h"
 #import "SystemConfiguration/CaptiveNetwork.h"
 
+#import <CoreTelephony/CTCarrier.h>
+#import <CoreTelephony/CTTelephonyNetworkInfo.h>
+
 #include <ifaddrs.h>
 
 #include <arpa/inet.h>
@@ -99,8 +102,24 @@
     case ReachableViaWiFi:
       return @"wifi";
     case ReachableViaWWAN:
-      return @"mobile";
+      return [self getMobile];
   }
+}
+
+- (NSString*)getMobile {
+           CTTelephonyNetworkInfo *info = [[CTTelephonyNetworkInfo alloc] init];
+        NSString *currentStatus = info.currentRadioAccessTechnology;
+    NSString *netconnType = @"mobile";
+    if ([currentStatus isEqualToString:@"CTRadioAccessTechnologyGPRS"] || [currentStatus isEqualToString:@"CTRadioAccessTechnologyEdge"] || [currentStatus isEqualToString:@"CTRadioAccessTechnologyCDMA1x"]) {
+                    netconnType = @"2G";
+                }else if ([currentStatus isEqualToString:@"CTRadioAccessTechnologyWCDMA"] || [currentStatus isEqualToString:@"CTRadioAccessTechnologyHSDPA"] || [currentStatus isEqualToString:@"CTRadioAccessTechnologyHSUPA"] || [currentStatus isEqualToString:@"CTRadioAccessTechnologyCDMAEVDORev0"] || [currentStatus isEqualToString:@"CTRadioAccessTechnologyCDMAEVDORevA"] || [currentStatus isEqualToString:@"CTRadioAccessTechnologyCDMAEVDORevB"]){
+
+                    netconnType = @"3G";
+                }else if ([currentStatus isEqualToString:@"CTRadioAccessTechnologyLTE"]){
+                    netconnType = @"4G";
+                }
+    info = nil;
+    return netconnType;
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {

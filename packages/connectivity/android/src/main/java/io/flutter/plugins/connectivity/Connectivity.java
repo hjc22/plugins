@@ -11,6 +11,8 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.telephony.TelephonyManager;
+import android.content.Context;
 
 /** Reports connectivity related information such as connectivity type and wifi information. */
 class Connectivity {
@@ -34,7 +36,31 @@ class Connectivity {
         return "wifi";
       }
       if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-        return "mobile";
+        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        int networkType = telephonyManager.getNetworkType();
+
+        switch (networkType) {
+          case TelephonyManager.NETWORK_TYPE_GPRS:
+          case TelephonyManager.NETWORK_TYPE_CDMA:
+          case TelephonyManager.NETWORK_TYPE_EDGE:
+          case TelephonyManager.NETWORK_TYPE_1xRTT:
+          case TelephonyManager.NETWORK_TYPE_IDEN:
+            return "2G";
+          case TelephonyManager.NETWORK_TYPE_EVDO_A:
+          case TelephonyManager.NETWORK_TYPE_UMTS:
+          case TelephonyManager.NETWORK_TYPE_EVDO_0:
+          case TelephonyManager.NETWORK_TYPE_HSDPA:
+          case TelephonyManager.NETWORK_TYPE_HSUPA:
+          case TelephonyManager.NETWORK_TYPE_HSPA:
+          case TelephonyManager.NETWORK_TYPE_EVDO_B:
+          case TelephonyManager.NETWORK_TYPE_EHRPD:
+          case TelephonyManager.NETWORK_TYPE_HSPAP:
+            return "3G";
+          case TelephonyManager.NETWORK_TYPE_LTE:
+            return "4G";
+          default:
+            return "mobile";
+        }
       }
     }
 
