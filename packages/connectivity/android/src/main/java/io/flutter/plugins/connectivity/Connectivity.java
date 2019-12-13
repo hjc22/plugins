@@ -14,14 +14,19 @@ import android.os.Build;
 import android.telephony.TelephonyManager;
 import android.content.Context;
 
-/** Reports connectivity related information such as connectivity type and wifi information. */
+/**
+ * Reports connectivity related information such as connectivity type and wifi
+ * information.
+ */
 class Connectivity {
   private ConnectivityManager connectivityManager;
   private WifiManager wifiManager;
+  private Context context;
 
-  Connectivity(ConnectivityManager connectivityManager, WifiManager wifiManager) {
+  Connectivity(ConnectivityManager connectivityManager, WifiManager wifiManager, Context context) {
     this.connectivityManager = connectivityManager;
     this.wifiManager = wifiManager;
+    this.context = context;
   }
 
   String getNetworkType() {
@@ -40,26 +45,26 @@ class Connectivity {
         int networkType = telephonyManager.getNetworkType();
 
         switch (networkType) {
-          case TelephonyManager.NETWORK_TYPE_GPRS:
-          case TelephonyManager.NETWORK_TYPE_CDMA:
-          case TelephonyManager.NETWORK_TYPE_EDGE:
-          case TelephonyManager.NETWORK_TYPE_1xRTT:
-          case TelephonyManager.NETWORK_TYPE_IDEN:
-            return "2G";
-          case TelephonyManager.NETWORK_TYPE_EVDO_A:
-          case TelephonyManager.NETWORK_TYPE_UMTS:
-          case TelephonyManager.NETWORK_TYPE_EVDO_0:
-          case TelephonyManager.NETWORK_TYPE_HSDPA:
-          case TelephonyManager.NETWORK_TYPE_HSUPA:
-          case TelephonyManager.NETWORK_TYPE_HSPA:
-          case TelephonyManager.NETWORK_TYPE_EVDO_B:
-          case TelephonyManager.NETWORK_TYPE_EHRPD:
-          case TelephonyManager.NETWORK_TYPE_HSPAP:
-            return "3G";
-          case TelephonyManager.NETWORK_TYPE_LTE:
-            return "4G";
-          default:
-            return "mobile";
+        case TelephonyManager.NETWORK_TYPE_GPRS:
+        case TelephonyManager.NETWORK_TYPE_CDMA:
+        case TelephonyManager.NETWORK_TYPE_EDGE:
+        case TelephonyManager.NETWORK_TYPE_1xRTT:
+        case TelephonyManager.NETWORK_TYPE_IDEN:
+          return "2G";
+        case TelephonyManager.NETWORK_TYPE_EVDO_A:
+        case TelephonyManager.NETWORK_TYPE_UMTS:
+        case TelephonyManager.NETWORK_TYPE_EVDO_0:
+        case TelephonyManager.NETWORK_TYPE_HSDPA:
+        case TelephonyManager.NETWORK_TYPE_HSUPA:
+        case TelephonyManager.NETWORK_TYPE_HSPA:
+        case TelephonyManager.NETWORK_TYPE_EVDO_B:
+        case TelephonyManager.NETWORK_TYPE_EHRPD:
+        case TelephonyManager.NETWORK_TYPE_HSPAP:
+          return "3G";
+        case TelephonyManager.NETWORK_TYPE_LTE:
+          return "4G";
+        default:
+          return "mobile";
         }
       }
     }
@@ -70,8 +75,10 @@ class Connectivity {
   String getWifiName() {
     WifiInfo wifiInfo = getWifiInfo();
     String ssid = null;
-    if (wifiInfo != null) ssid = wifiInfo.getSSID();
-    if (ssid != null) ssid = ssid.replaceAll("\"", ""); // Android returns "SSID"
+    if (wifiInfo != null)
+      ssid = wifiInfo.getSSID();
+    if (ssid != null)
+      ssid = ssid.replaceAll("\"", ""); // Android returns "SSID"
     return ssid;
   }
 
@@ -86,17 +93,16 @@ class Connectivity {
 
   String getWifiIPAddress() {
     WifiInfo wifiInfo = null;
-    if (wifiManager != null) wifiInfo = wifiManager.getConnectionInfo();
+    if (wifiManager != null)
+      wifiInfo = wifiManager.getConnectionInfo();
 
     String ip = null;
     int i_ip = 0;
-    if (wifiInfo != null) i_ip = wifiInfo.getIpAddress();
+    if (wifiInfo != null)
+      i_ip = wifiInfo.getIpAddress();
 
     if (i_ip != 0)
-      ip =
-          String.format(
-              "%d.%d.%d.%d",
-              (i_ip & 0xff), (i_ip >> 8 & 0xff), (i_ip >> 16 & 0xff), (i_ip >> 24 & 0xff));
+      ip = String.format("%d.%d.%d.%d", (i_ip & 0xff), (i_ip >> 8 & 0xff), (i_ip >> 16 & 0xff), (i_ip >> 24 & 0xff));
 
     return ip;
   }
@@ -114,16 +120,16 @@ class Connectivity {
     }
     int type = info.getType();
     switch (type) {
-      case ConnectivityManager.TYPE_ETHERNET:
-      case ConnectivityManager.TYPE_WIFI:
-      case ConnectivityManager.TYPE_WIMAX:
-        return "wifi";
-      case ConnectivityManager.TYPE_MOBILE:
-      case ConnectivityManager.TYPE_MOBILE_DUN:
-      case ConnectivityManager.TYPE_MOBILE_HIPRI:
-        return "mobile";
-      default:
-        return "none";
+    case ConnectivityManager.TYPE_ETHERNET:
+    case ConnectivityManager.TYPE_WIFI:
+    case ConnectivityManager.TYPE_WIMAX:
+      return "wifi";
+    case ConnectivityManager.TYPE_MOBILE:
+    case ConnectivityManager.TYPE_MOBILE_DUN:
+    case ConnectivityManager.TYPE_MOBILE_HIPRI:
+      return "mobile";
+    default:
+      return "none";
     }
   }
 }
