@@ -140,7 +140,8 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   /// The name of the asset is given by the [dataSource] argument and must not be
   /// null. The [package] argument must be non-null when the asset comes from a
   /// package and null otherwise.
-  VideoPlayerController.asset(this.dataSource, {this.package})
+  VideoPlayerController.asset(this.dataSource,
+      {this.package, this.onSinglePlayCompleted})
       : dataSourceType = DataSourceType.asset,
         formatHint = null,
         useCache = null,
@@ -155,7 +156,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   /// the video format detection code. The [useCache] argument must be non-null,
   /// default is false.
   VideoPlayerController.network(this.dataSource,
-      {this.formatHint, bool useCache = false})
+      {this.formatHint, bool useCache = false, this.onSinglePlayCompleted})
       : assert(useCache != null),
         dataSourceType = DataSourceType.network,
         package = null,
@@ -166,7 +167,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   ///
   /// This will load the file from the file-URI given by:
   /// `'file://${file.path}'`.
-  VideoPlayerController.file(File file)
+  VideoPlayerController.file(File file, {this.onSinglePlayCompleted})
       : dataSource = 'file://${file.path}',
         dataSourceType = DataSourceType.file,
         package = null,
@@ -181,6 +182,8 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   static int _maxCacheFileSize = 10 * 1024 * 1024;
 
   int _textureId;
+
+  final VoidCallback onSinglePlayCompleted;
 
   /// The URI to the video file. This will be in different formats depending on
   /// the [DataSourceType] of the original video.
@@ -204,7 +207,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   static Completer<void> _pluginInitializingCompleter;
   Completer<void> _creatingCompleter;
   StreamSubscription<dynamic> _eventSubscription;
-  _VideoAppLifeCycleObserver _lifeCycleObserver;
+  // _VideoAppLifeCycleObserver _lifeCycleObserver;
 
   /// This is just exposed for testing. It shouldn't be used by anyone depending
   /// on the plugin.
@@ -234,9 +237,8 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   /// Attempts to open the given [dataSource] and load metadata about the video.
   Future<void> initialize() async {
     await _ensureVideoPluginInitialized();
-
-    _lifeCycleObserver = _VideoAppLifeCycleObserver(this);
-    _lifeCycleObserver.initialize();
+    // _lifeCycleObserver = _VideoAppLifeCycleObserver(this);
+    // _lifeCycleObserver.initialize();
     _creatingCompleter = Completer<void>();
 
     DataSource dataSourceDescription;
@@ -298,6 +300,11 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
         case VideoEventType.bufferingEnd:
           value = value.copyWith(isBuffering: false);
           break;
+        case VideoEventType.singlePlayCompleted:
+          if (onSinglePlayCompleted != null) {
+            onSinglePlayCompleted();
+          }
+          break;
         case VideoEventType.unknown:
           break;
       }
@@ -341,7 +348,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
         await _eventSubscription?.cancel();
         await VideoPlayerPlatform.instance.dispose(_textureId);
       }
-      _lifeCycleObserver.dispose();
+      // _lifeCycleObserver.dispose();
     }
     _isDisposed = true;
     super.dispose();
