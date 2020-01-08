@@ -95,8 +95,19 @@ static void* playbackBufferFullContext = &playbackBufferFullContext;
   if (_isLooping) {
     AVPlayerItem* p = [notification object];
     [p seekToTime:kCMTimeZero completionHandler:nil];
+    @try {
+      if (_eventSink != nil) {
+         _eventSink(@{@"event" : @"singlePlayCompleted"});
+      } 
+    }
+    @catch (NSException *exception) {
+          // Print exception information
+          NSLog( @"NSException caught" );
+          NSLog( @"Name: %@", exception.name);
+          NSLog( @"Reason: %@", exception.reason );
+    }
   } else {
-    if (_eventSink) {
+    if (_eventSink != nil) {
       _eventSink(@{@"event" : @"completed"});
     }
   }

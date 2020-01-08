@@ -274,6 +274,7 @@ enum VideoEventType {
 
   /// The video stopped to buffer.
   bufferingEnd,
+  singlePlayCompleted,
 
   /// An unknown event has been received.
   unknown,
