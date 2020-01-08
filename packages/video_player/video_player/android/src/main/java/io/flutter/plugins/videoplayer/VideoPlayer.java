@@ -192,6 +192,13 @@ final class VideoPlayer {
               eventSink.error("VideoError", "Video player had error " + error, null);
             }
           }
+            @Override
+            public void onPositionDiscontinuity(int reason) {
+              Map<String, Object> event = new HashMap<>();
+              event.put("event", "singlePlayCompleted");
+              eventSink.success(event);
+            }
+
         });
 
     Map<String, Object> reply = new HashMap<>();
