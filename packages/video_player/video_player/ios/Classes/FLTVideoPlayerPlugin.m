@@ -41,6 +41,7 @@ int64_t FLTCMTimeToMillis(CMTime time) {
 @property(nonatomic, readonly) bool disposed;
 @property(nonatomic, readonly) bool isPlaying;
 @property(nonatomic) bool isLooping;
+@property (nonatomic, strong) NSString *status_playType;
 @property(nonatomic, readonly) bool isInitialized;
 - (instancetype)initWithURL:(NSURL*)url frameUpdater:(FLTFrameUpdater*)frameUpdater;
 - (void)play;
@@ -270,6 +271,22 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
                         change:(NSDictionary*)change
                        context:(void*)context {
   if (context == timeRangeContext) {
+      
+    NSTimeInterval timeInterval = [self availableDuration];// 计算缓冲进度
+    NSLog(@"已缓存时长 : %f",timeInterval);
+      
+  if (timeInterval > self.getCurrentPlayingTime + 7){ // 缓存 大于 播放 当前时长+5
+      if ([self.status_playType  isEqual: @"等待播放"]) { // 接着之前 播放时长 继续播放
+          [self.player play];
+          self.status_playType = @"正在播放";
+          NSLog(@"恢复播放");
+      }
+  }else{
+      self.status_playType = @"等待播放"; // 出现问题，等待播放
+      NSLog(@"等待播放，网络出现问题");
+  }
+      
+      
     if (_eventSink != nil) {
       NSMutableArray<NSArray<NSNumber*>*>* values = [[NSMutableArray alloc] init];
       for (NSValue* rangeValue in [object loadedTimeRanges]) {
@@ -315,6 +332,26 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
       _eventSink(@{@"event" : @"bufferingEnd"});
     }
   }
+}
+
+/**
+ *  返回 当前 视频 播放时长
+ */
+- (double)getCurrentPlayingTime{
+    return self.player.currentTime.value/self.player.currentTime.timescale;
+}
+
+/**
+ *  返回 当前 视频 缓存时长
+ */
+- (NSTimeInterval)availableDuration{
+        NSArray *loadedTimeRanges = [[self.player currentItem] loadedTimeRanges];
+        CMTimeRange timeRange = [loadedTimeRanges.firstObject CMTimeRangeValue];// 获取缓冲区域
+        float startSeconds = CMTimeGetSeconds(timeRange.start);
+        float durationSeconds = CMTimeGetSeconds(timeRange.duration);
+        NSTimeInterval result = startSeconds + durationSeconds;// 计算缓冲总进度
+       
+     return result;
 }
 
 - (void)updatePlayingState {
@@ -519,10 +556,10 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
       BOOL useCache = [argsMap[@"useCache"] boolValue];
       BOOL enableCache = _maxCacheSize > 0 && _maxCacheFileSize > 0 && useCache;
       if (enableCache) {
-        NSString* escapedURL = [uriArg
-            stringByAddingPercentEncodingWithAllowedCharacters:NSMutableCharacterSet
-                                                                   .alphanumericCharacterSet];
-        player = [[FLTVideoPlayer alloc] initWithURL:[NSURL URLWithString:escapedURL]
+//        NSString* escapedURL = [uriArg
+//            stringByAddingPercentEncodingWithAllowedCharacters:NSMutableCharacterSet
+//                                                                   .alphanumericCharacterSet];
+        player = [[FLTVideoPlayer alloc] initWithURL:[NSURL URLWithString:uriArg]
                                         frameUpdater:frameUpdater
                                          enableCache:enableCache];
       } else {
